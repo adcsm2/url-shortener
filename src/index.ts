@@ -3,6 +3,7 @@ import "reflect-metadata";
 import express from "express";
 import { AppDataSource } from "./data-source";
 import shortenRouter from "./routes/shorten";
+import redirectRouter from "./routes/redirect";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -18,6 +19,10 @@ app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
 });
 
+// IMPORTANTE: Redirect router debe ir AL FINAL
+// Porque /:shortCode captura cualquier ruta
+app.use("/", redirectRouter);
+
 // Initialize database and start server
 AppDataSource.initialize()
   .then(() => {
@@ -25,6 +30,9 @@ AppDataSource.initialize()
 
     app.listen(PORT, () => {
       console.log(`✓ Server running on http://localhost:${PORT}`);
+      console.log(`✓ POST /api/shorten - Shorten URLs`);
+      console.log(`✓ GET /:shortCode - Redirect to original URL`);
+      console.log(`✓ GET /health - Health check`);
     });
   })
   .catch((error) => {
