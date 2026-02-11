@@ -24,9 +24,20 @@
 - Conexión a DB verificada desde src/index.ts
 - PR #2 mergeado
 
+### Fase 3: Endpoint POST /api/shorten ✅
+- ID generator con nanoid (7 chars, custom alphabet sin caracteres ambiguos)
+- urlService con detección de duplicados y collision retry
+- Middleware validateUrl (protocolo, longitud, URL válida, seguridad)
+- Ruta POST /api/shorten con Express Router
+- Express server completo en index.ts con health check
+- 20 tests pasando (4 idGenerator + 6 urlService + 10 shorten route)
+- Cobertura: 98.64% statements, 91.3% branches
+- ADR 001: ID generation documentado
+- Learnings 001-002 documentados (TypeORM strict mode, Docker Windows)
+
 ## 🚧 En progreso
 
-Ninguno - esperando Fase 3.
+Ninguno - esperando Fase 4.
 
 ## 📋 Fase 1: Setup inicial (COMPLETADA)
 
@@ -67,7 +78,7 @@ Ninguno - esperando Fase 3.
 - `src/migrations/1770836628377-CreateUrlTable.ts`
 - `src/index.ts` (verificación de conexión)
 
-## 📋 Fase 3: Endpoint POST /api/shorten (SIGUIENTE)
+## 📋 Fase 3: Endpoint POST /api/shorten (COMPLETADA)
 
 ### Tareas:
 1. Crear `src/utils/idGenerator.ts`
