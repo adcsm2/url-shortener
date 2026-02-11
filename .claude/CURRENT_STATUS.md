@@ -6,13 +6,29 @@
 
 ## ✅ Completado
 
-Nada aún - proyecto por empezar.
+### Fase 1: Setup inicial ✅
+- Estructura de carpetas creada
+- npm + git inicializados
+- Dependencias instaladas (Express 5, TypeORM, Jest, etc.)
+- TypeScript strict mode configurado con decoradores
+- Jest + Supertest configurados (threshold 80%)
+- ESLint con reglas estrictas
+- Docker Compose para PostgreSQL 15
+- TypeORM data source configurado
+- PR #1 mergeado
+
+### Fase 2: Entidad y migración ✅
+- Entity `Url` creada con TypeORM decorators
+- Migración `CreateUrlTable` generada y ejecutada
+- Tabla `url` verificada en PostgreSQL (shortCode UNIQUE, clicks default 0)
+- Conexión a DB verificada desde src/index.ts
+- PR #2 mergeado
 
 ## 🚧 En progreso
 
-Ninguno.
+Ninguno - esperando Fase 3.
 
-## 📋 Fase 1: Setup inicial (SIGUIENTE)
+## 📋 Fase 1: Setup inicial (COMPLETADA)
 
 ### Tareas:
 1. Crear estructura de carpetas
@@ -38,19 +54,20 @@ Ninguno.
 - `.gitignore`
 - `README.md`
 
-## 📋 Fase 2: Entidad y migración
+## 📋 Fase 2: Entidad y migración (COMPLETADA)
 
 ### Tareas:
-1. Crear entity `Url`
-2. Generar migración inicial
-3. Configurar scripts para migrations
-4. Probar conexión a DB
+1. ✅ Crear entity `Url`
+2. ✅ Generar migración inicial
+3. ✅ Configurar scripts para migrations
+4. ✅ Probar conexión a DB
 
-### Archivos a crear:
+### Archivos creados:
 - `src/entities/Url.ts`
-- `src/migrations/XXXXX-CreateUrlTable.ts` (auto-generado)
+- `src/migrations/1770836628377-CreateUrlTable.ts`
+- `src/index.ts` (verificación de conexión)
 
-## 📋 Fase 3: Endpoint POST /api/shorten
+## 📋 Fase 3: Endpoint POST /api/shorten (SIGUIENTE)
 
 ### Tareas:
 1. Crear `src/utils/idGenerator.ts`
