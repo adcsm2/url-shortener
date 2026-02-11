@@ -1,0 +1,304 @@
+# URL Shortener - Contexto del Proyecto
+
+## 🎯 Propósito
+Construir un acortador de URLs (como bit.ly) para aprender sobre:
+- Servidores HTTP con Express
+- Bases de datos relacionales (PostgreSQL)
+- Generación de IDs únicos y cortos
+- Redirecciones HTTP
+- Routing y middleware
+
+**Parte de**: Portfolio de proyectos para demostrar competencias técnicas a recruiters.
+
+## 🛠️ Stack técnico
+
+### Core
+- Node.js v20
+- Express (servidor HTTP)
+- TypeScript (strict mode obligatorio)
+- PostgreSQL + TypeORM (ORM para DB)
+
+### Testing
+- Jest + Supertest (tests de API)
+- Cobertura mínima: 80%
+
+### Utilities
+- nanoid (generación de IDs cortos)
+- dotenv (variables de entorno)
+
+### Infraestructura
+- Docker Compose (PostgreSQL local)
+
+## 📁 Estructura del proyecto
+````
+url-shortener/
+├── src/
+│   ├── index.ts              # Entry point, Express setup
+│   ├── entities/
+│   │   └── Url.ts           # TypeORM entity
+│   ├── routes/
+│   │   ├── shorten.ts       # POST /shorten
+│   │   └── redirect.ts      # GET /:shortCode
+│   ├── services/
+│   │   └── urlService.ts    # Lógica de negocio
+│   └── utils/
+│       └── idGenerator.ts   # Generación de IDs únicos
+├── tests/
+│   ├── routes/
+│   │   ├── shorten.test.ts
+│   │   └── redirect.test.ts
+│   └── services/
+│       └── urlService.test.ts
+├── docs/dev/
+│   ├── architecture/
+│   │   ├── 001-id-generation.md  # Por qué nanoid
+│   │   └── 002-database-choice.md # Por qué PostgreSQL
+│   └── learnings/
+├── docker-compose.yml        # PostgreSQL container
+├── .env.example
+├── package.json
+├── tsconfig.json
+└── README.md
+````
+
+## 🚀 Endpoints a implementar
+
+### 1. Shorten URL (POST /api/shorten)
+````bash
+POST /api/shorten
+Content-Type: application/json
+
+{
+  "url": "https://example.com/very/long/url"
+}
+
+# Response:
+{
+  "shortUrl": "http://localhost:3000/abc123",
+  "shortCode": "abc123",
+  "originalUrl": "https://example.com/very/long/url"
+}
+````
+
+### 2. Redirect (GET /:shortCode)
+````bash
+GET /abc123
+
+# Response:
+HTTP 302 Found
+Location: https://example.com/very/long/url
+````
+
+### 3. Stats (GET /api/stats/:shortCode)
+````bash
+GET /api/stats/abc123
+
+# Response:
+{
+  "shortCode": "abc123",
+  "originalUrl": "https://example.com/very/long/url",
+  "clicks": 42,
+  "createdAt": "2025-02-11T10:00:00Z"
+}
+````
+
+## 💾 Modelo de datos
+
+### Entity: Url
+````typescript
+@Entity()
+export class Url {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({ unique: true, length: 10 })
+  shortCode: string;
+
+  @Column('text')
+  originalUrl: string;
+
+  @Column({ default: 0 })
+  clicks: number;
+
+  @CreateDateColumn()
+  createdAt: Date;
+}
+````
+
+## ✅ Validaciones requeridas
+
+### POST /api/shorten
+- ✅ URL válida (usar librería `validator` o regex)
+- ✅ URL no vacía
+- ✅ Protocolo HTTP/HTTPS requerido
+- ✅ Longitud URL < 2048 caracteres
+
+### GET /:shortCode
+- ✅ shortCode existe en DB → redirect
+- ✅ shortCode NO existe → 404 Not Found
+
+### Generación de IDs
+- ✅ IDs únicos de 7 caracteres (nanoid)
+- ✅ Manejar colisiones (muy improbable pero posible)
+- ✅ Solo caracteres URL-safe (a-z, A-Z, 0-9, -, _)
+
+## 🧪 Estrategia de testing
+
+### Tests de integración (con Supertest)
+````typescript
+describe('POST /api/shorten', () => {
+  it('should shorten valid URL');
+  it('should reject invalid URL');
+  it('should reject URL without protocol');
+  it('should return same shortCode for duplicate URL');
+});
+
+describe('GET /:shortCode', () => {
+  it('should redirect to original URL');
+  it('should increment click counter');
+  it('should return 404 for non-existent code');
+});
+
+describe('GET /api/stats/:shortCode', () => {
+  it('should return stats for existing code');
+  it('should return 404 for non-existent code');
+});
+````
+
+### Tests unitarios
+````typescript
+describe('urlService.shortenUrl', () => {
+  it('should generate unique short code');
+  it('should save URL to database');
+  it('should handle duplicate URLs');
+});
+
+describe('idGenerator.generate', () => {
+  it('should generate 7-character code');
+  it('should generate unique codes');
+  it('should only use URL-safe characters');
+});
+````
+
+## 🔧 Convenciones del proyecto
+
+### TypeScript
+- Strict mode habilitado
+- No `any` permitido
+- Interfaces explícitas
+
+### Express
+- Router modular (routes/)
+- Middleware para validaciones
+- Error handling centralizado
+
+### Base de datos
+- TypeORM para migrations
+- Entities en entities/
+- Nunca raw SQL en routes
+
+### Git
+- Conventional Commits
+- Ejemplos:
+  - `feat: add shorten endpoint`
+  - `feat: add redirect functionality`
+  - `test: add integration tests for shorten`
+  - `docs: document ID generation strategy`
+
+### Código generado por IA
+````typescript
+// Generated by Claude Code
+// Purpose: [breve descripción]
+````
+
+## 🔍 Decisiones arquitectónicas a documentar
+
+### Decisión 001: Algoritmo de generación de IDs
+**Problema:** ¿Cómo generar IDs cortos, únicos y URL-safe?
+
+**Opciones:**
+1. **nanoid** - Generación aleatoria criptográficamente segura
+2. **Hash (MD5/SHA)** - Hashear URL completa y truncar
+3. **Auto-increment + Base62** - ID numérico convertido a base62
+
+**Documentar:**
+- Por qué nanoid (7 chars = 128+ millones de URLs antes de colisión)
+- Trade-off: IDs aleatorios vs secuenciales
+- Longitud elegida (7 caracteres)
+
+### Decisión 002: PostgreSQL vs otros
+**Problema:** ¿Qué base de datos usar?
+
+**Opciones:**
+1. **PostgreSQL** - Relacional, ACID, robusto
+2. **MongoDB** - NoSQL, flexible
+3. **Redis** - In-memory, rápido
+
+**Documentar:**
+- Por qué PostgreSQL (relaciones futuras, ACID, índices únicos)
+- Trade-off: Setup más complejo vs garantías de consistencia
+
+## 📚 Recursos de referencia
+
+### Documentación
+- Express: https://expressjs.com/
+- TypeORM: https://typeorm.io/
+- nanoid: https://github.com/ai/nanoid
+- Supertest: https://github.com/visionmedia/supertest
+
+### Templates
+- Decisión arquitectónica: `.claude/templates/architecture-decision.md`
+
+## 🎓 Objetivos de aprendizaje
+
+Este proyecto demuestra a recruiters:
+
+1. **Servidor HTTP**: Express setup, routing, middleware
+2. **Base de datos relacional**: PostgreSQL + TypeORM, migrations, entities
+3. **Generación de IDs únicos**: Algoritmos, colisiones, probabilidades
+4. **Redirecciones HTTP**: Status codes 302, Location headers
+5. **Testing de APIs**: Supertest, tests de integración
+6. **Docker Compose**: Levantar dependencias localmente
+7. **Variables de entorno**: .env, configuración por ambiente
+
+## 🪟 Comandos útiles
+````bash
+# Setup
+npm install
+docker-compose up -d  # Levantar PostgreSQL
+
+# Desarrollo
+npm run dev           # Servidor con hot reload
+npm run migration:run # Correr migrations
+npm run migration:generate -- -n MigrationName
+
+# Testing
+npm test
+npm run test:watch
+npm run test:coverage
+
+# Build
+npm run build
+npm start
+
+# Docker
+docker-compose up -d    # Levantar DB
+docker-compose down     # Detener DB
+docker-compose logs     # Ver logs
+````
+
+## ⚠️ Edge cases importantes
+
+- URL ya acortada anteriormente → retornar mismo shortCode
+- shortCode colisión (improbable) → regenerar
+- URL inválida → 400 Bad Request con mensaje claro
+- shortCode no existe → 404 Not Found
+- DB down → 503 Service Unavailable
+- URL muy larga (>2048) → rechazar
+
+## 🔐 Seguridad
+
+- **Rate limiting**: Limitar requests por IP (express-rate-limit)
+- **Validación de URLs**: No permitir `javascript:`, `file://`, etc.
+- **SQL Injection**: TypeORM previene esto automáticamente
+- **No passwords**: Este proyecto no maneja autenticación (out of scope)
