@@ -1,49 +1,49 @@
-# ADR 001: Algoritmo de Generación de IDs
+# ADR 001: ID Generation Algorithm
 
-## Estado
+## Status
 
-Aceptado
+Accepted
 
-## Contexto
+## Context
 
-Necesitamos generar IDs cortos, únicos y URL-safe para las URLs acortadas. El ID aparece directamente en la URL (`http://localhost:3000/abc1234`), por lo que debe ser:
-- Corto (7 caracteres)
-- Único (sin colisiones)
-- URL-safe (sin caracteres que requieran encoding)
-- Legible (sin caracteres ambiguos)
+We need to generate short, unique, URL-safe IDs for shortened URLs. The ID appears directly in the URL (`http://localhost:3000/abc1234`), so it must be:
+- Short (7 characters)
+- Unique (no collisions)
+- URL-safe (no characters requiring encoding)
+- Readable (no ambiguous characters)
 
-## Opciones evaluadas
+## Options Considered
 
-### 1. nanoid con custom alphabet (ELEGIDA)
-- Generación aleatoria criptográficamente segura
-- Alphabet personalizado sin caracteres ambiguos (0, O, I, l)
-- 7 chars con 57 caracteres de alphabet = 57^7 ≈ 1.95 mil millones de combinaciones
-- Probabilidad de colisión muy baja
+### 1. nanoid with custom alphabet (CHOSEN)
+- Cryptographically secure random generation
+- Custom alphabet excluding ambiguous characters (0, O, I, l)
+- 7 chars with 57-character alphabet = 57^7 ~ 1.95 billion combinations
+- Very low collision probability
 
-### 2. Hash (MD5/SHA) truncado
-- Hashear la URL completa y tomar los primeros 7 caracteres
-- Determinístico: misma URL → mismo hash
-- Problema: alta probabilidad de colisión al truncar (birthday paradox)
-- Se pierde la ventaja del hashing al necesitar verificar colisiones igualmente
+### 2. Truncated hash (MD5/SHA)
+- Hash the full URL and take the first 7 characters
+- Deterministic: same URL → same hash
+- Problem: high collision probability when truncating (birthday paradox)
+- Loses the advantage of hashing since collision checks are still needed
 
 ### 3. Auto-increment + Base62
-- ID numérico autoincremental convertido a base62
-- IDs secuenciales → predecible (se pueden enumerar todas las URLs)
-- Requiere lógica adicional de conversión de base
-- Problema de seguridad: revela cuántas URLs hay en el sistema
+- Auto-incrementing numeric ID converted to base62
+- Sequential IDs → predictable (all URLs can be enumerated)
+- Requires additional base conversion logic
+- Security problem: reveals how many URLs exist in the system
 
-## Decisión
+## Decision
 
-**nanoid v3** con custom alphabet de 57 caracteres y longitud 7.
+**nanoid v3** with a custom 57-character alphabet and length 7.
 
 ```typescript
 const alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 const nanoid = customAlphabet(alphabet, 7);
 ```
 
-## Manejo de colisiones
+## Collision Handling
 
-Aunque la probabilidad es extremadamente baja (~1 en 1.95 mil millones), implementamos un retry loop con máximo 5 intentos:
+Although the probability is extremely low (~1 in 1.95 billion), we implement a retry loop with a maximum of 5 attempts:
 
 ```typescript
 do {
@@ -56,13 +56,13 @@ do {
 
 ## Trade-offs
 
-| Aspecto | nanoid | Hash truncado | Auto-increment |
-|---------|--------|---------------|----------------|
-| Seguridad | Alta (aleatorio) | Media | Baja (predecible) |
-| Unicidad | Muy alta | Media (colisiones) | Garantizada |
-| Performance | Rápido | Medio (hash + truncate) | Rápido |
-| Complejidad | Baja | Media | Media |
+| Aspect | nanoid | Truncated hash | Auto-increment |
+|--------|--------|----------------|----------------|
+| Security | High (random) | Medium | Low (predictable) |
+| Uniqueness | Very high | Medium (collisions) | Guaranteed |
+| Performance | Fast | Medium (hash + truncate) | Fast |
+| Complexity | Low | Medium | Medium |
 
-## Nota sobre nanoid v3 vs v5
+## Note on nanoid v3 vs v5
 
-Usamos nanoid v3 porque es compatible con CommonJS (`require()`). nanoid v5+ es ESM-only, lo que causa problemas con TypeORM y ts-node en modo CommonJS.
+We use nanoid v3 because it's compatible with CommonJS (`require()`). nanoid v5+ is ESM-only, which causes issues with TypeORM and ts-node in CommonJS mode.
