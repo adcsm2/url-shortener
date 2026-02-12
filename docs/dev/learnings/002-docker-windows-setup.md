@@ -1,33 +1,33 @@
-# Learning 002: Docker Desktop en Windows - Setup Inicial
+# Learning 002: Docker Desktop on Windows - Initial Setup
 
-## Problema
+## Problem
 
-Al intentar `docker-compose up -d`, obtuvimos varios errores consecutivos:
+When running `docker-compose up -d`, we encountered several consecutive errors:
 
-1. `docker daemon is not running` — Docker Desktop no estaba abierto
-2. `open \\.\pipe\docker_engine: El sistema no puede encontrar el archivo especificado` — WSL2 kernel faltante
-3. `open \\.\pipe\docker_engine_windows` — Docker estaba en modo Windows containers
+1. `docker daemon is not running` — Docker Desktop was not open
+2. `open \\.\pipe\docker_engine: The system cannot find the file specified` — WSL2 kernel missing
+3. `open \\.\pipe\docker_engine_windows` — Docker was in Windows containers mode
 
-## Soluciones aplicadas
+## Solutions Applied
 
-### 1. WSL2 kernel no instalado
+### 1. WSL2 kernel not installed
 
 ```bash
 wsl --update
 ```
 
-Docker Desktop en Windows requiere WSL2 como backend. Si el kernel no está instalado, Docker no puede arrancar.
+Docker Desktop on Windows requires WSL2 as its backend. If the kernel is not installed, Docker cannot start.
 
 ### 2. Windows containers vs Linux containers
 
-Docker Desktop puede ejecutar contenedores Windows o Linux, pero no ambos simultáneamente. PostgreSQL (imagen `postgres:15-alpine`) es una imagen Linux.
+Docker Desktop can run either Windows or Linux containers, but not both simultaneously. PostgreSQL (`postgres:15-alpine`) is a Linux image.
 
-**Fix**: Clic derecho en Docker Desktop (tray icon) → "Switch to Linux containers..."
+**Fix**: Right-click Docker Desktop (tray icon) → "Switch to Linux containers..."
 
-## Checklist para setup en Windows
+## Checklist for Windows Setup
 
-1. Instalar Docker Desktop
-2. Ejecutar `wsl --update` como administrador
-3. Verificar que Docker usa Linux containers (no Windows)
-4. Abrir Docker Desktop y esperar a que diga "Engine running"
-5. Ejecutar `docker ps` para verificar conexión
+1. Install Docker Desktop
+2. Run `wsl --update` as administrator
+3. Verify Docker uses Linux containers (not Windows)
+4. Open Docker Desktop and wait until it says "Engine running"
+5. Run `docker ps` to verify connection
