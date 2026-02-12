@@ -2,10 +2,11 @@
 import { Router, Request, Response } from "express";
 import { shortenUrl } from "../services/urlService";
 import { validateUrl } from "../middleware/validateUrl";
+import { shortenLimiter } from "../middleware/rateLimiter";
 
 const router = Router();
 
-router.post("/shorten", validateUrl, async (req: Request, res: Response): Promise<void> => {
+router.post("/shorten", shortenLimiter, validateUrl, async (req: Request, res: Response): Promise<void> => {
   try {
     const { url } = req.body;
     const urlEntity = await shortenUrl(url);
