@@ -3,6 +3,7 @@ import "reflect-metadata";
 import express from "express";
 import { AppDataSource } from "./data-source";
 import shortenRouter from "./routes/shorten";
+import statsRouter from "./routes/stats";
 import redirectRouter from "./routes/redirect";
 
 const app = express();
@@ -13,6 +14,7 @@ app.use(express.json());
 
 // Routes
 app.use("/api", shortenRouter);
+app.use("/api", statsRouter);
 
 // Health check
 app.get("/health", (_req, res) => {
@@ -31,6 +33,7 @@ AppDataSource.initialize()
     app.listen(PORT, () => {
       console.log(`✓ Server running on http://localhost:${PORT}`);
       console.log(`✓ POST /api/shorten - Shorten URLs`);
+      console.log(`✓ GET /api/stats/:shortCode - URL statistics`);
       console.log(`✓ GET /:shortCode - Redirect to original URL`);
       console.log(`✓ GET /health - Health check`);
     });
