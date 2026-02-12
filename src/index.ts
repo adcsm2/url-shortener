@@ -5,12 +5,14 @@ import { AppDataSource } from "./data-source";
 import shortenRouter from "./routes/shorten";
 import statsRouter from "./routes/stats";
 import redirectRouter from "./routes/redirect";
+import { globalLimiter } from "./middleware/rateLimiter";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(express.json());
+app.use(globalLimiter);
 
 // Routes
 app.use("/api", shortenRouter);
